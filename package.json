@@ -1,0 +1,27 @@
+{
+  "name": "zakat-calculator",
+  "version": "1.0.0",
+  "description": "Desktop Zakat Calculator",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "node scripts/start.js",
+    "dist": "electron-builder --win",
+    "dist:portable": "electron-builder --win portable"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YoussofEshrah/The-Zakat-Calculator.git"
+  },
+  "author": "Youssof Eshrah",
+  "license": "ISC",
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "electron": "^32.2.7",
+    "electron-builder": "^25.1.8"
+  },
+  "bugs": {
+    "url": "https://github.com/YoussofEshrah/The-Zakat-Calculator/issues"
+  },
+  "homepage": "https://github.com/YoussofEshrah/The-Zakat-Calculator#readme",
+  "keywords": []
+}

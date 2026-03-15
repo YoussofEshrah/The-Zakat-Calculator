@@ -1,0 +1,134 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background: var(--color-bg);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  overflow: hidden;
+}
+
+#app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Header --- */
+.app-header {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  padding: var(--space-lg) var(--space-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  -webkit-app-region: drag;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.app-header__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.3px;
+}
+
+.app-header__subtitle {
+  font-size: var(--font-size-sm);
+  opacity: 0.85;
+  font-weight: var(--font-weight-normal);
+  margin-inline-start: var(--space-md);
+}
+
+.app-header__right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  -webkit-app-region: no-drag;
+}
+
+/* --- Main layout --- */
+.app-main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.panel {
+  overflow-y: auto;
+  padding: var(--space-xl);
+}
+
+.panel--input {
+  flex: 1;
+  min-width: 0;
+  background: var(--color-bg);
+}
+
+.panel--results {
+  width: 360px;
+  flex-shrink: 0;
+  background: var(--color-surface);
+  border-inline-start: 1px solid var(--color-border);
+}
+
+/* --- Status bar --- */
+.status-bar {
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-xs) var(--space-xl);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+
+.status-bar__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.status-bar__dot--live {
+  background: var(--color-success);
+}
+
+.status-bar__dot--stale {
+  background: var(--color-warning);
+}
+
+.status-bar__dot--error {
+  background: var(--color-danger);
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
