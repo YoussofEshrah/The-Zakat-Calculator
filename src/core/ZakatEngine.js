@@ -14,6 +14,13 @@ class ZakatEngine {
    * @returns {Object} result
    */
   static calculate({ assets, metalPrices, exchangeRates, outputCurrency }) {
+    // Guard: prices must be valid positive numbers — prevents $0 Nisab bugs
+    // caused by NaN/null leaking through IPC JSON serialization
+    const goldPx = parseFloat(metalPrices?.goldPerGramUSD);
+    const silverPx = parseFloat(metalPrices?.silverPerGramUSD);
+    if (!isFinite(goldPx) || goldPx <= 0) throw new Error('Invalid gold price — please retry fetching prices.');
+    if (!isFinite(silverPx) || silverPx <= 0) throw new Error('Invalid silver price — please retry fetching prices.');
+
     const outputRate = exchangeRates[outputCurrency] || 1;
 
     // Group assets by category

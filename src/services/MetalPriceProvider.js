@@ -79,10 +79,21 @@ class MetalPriceProvider {
       httpGet('https://api.metals.live/v1/spot/silver'),
     ]);
 
-    const goldPerOzUSD = Array.isArray(goldData) ? goldData[goldData.length - 1].price : goldData.price;
-    const silverPerOzUSD = Array.isArray(silverData) ? silverData[silverData.length - 1].price : silverData.price;
+    const goldPerOzUSD = this._extractSpotPrice(goldData, 'gold');
+    const silverPerOzUSD = this._extractSpotPrice(silverData, 'silver');
 
     return this._normalize(goldPerOzUSD, silverPerOzUSD);
+  }
+
+  // metals.live may return [{gold: 1925}, ...] or [{price: 1925}, ...] depending on endpoint version
+  _extractSpotPrice(data, metalKey) {
+    const item = Array.isArray(data) ? data[data.length - 1] : data;
+    const price = item?.[metalKey] ?? item?.price ?? item?.rate ?? item?.value;
+    const num = parseFloat(price);
+    if (!isFinite(num) || num <= 0) {
+      throw new Error(`Unexpected metals.live response for ${metalKey}: ${JSON.stringify(item)}`);
+    }
+    return num;
   }
 
   async _fetchFromGoldAPI() {
@@ -98,11 +109,15 @@ class MetalPriceProvider {
   }
 
   _normalize(goldPerOzUSD, silverPerOzUSD) {
+    const g = parseFloat(goldPerOzUSD);
+    const s = parseFloat(silverPerOzUSD);
+    if (!isFinite(g) || g <= 0) throw new Error(`Invalid gold price: ${goldPerOzUSD}`);
+    if (!isFinite(s) || s <= 0) throw new Error(`Invalid silver price: ${silverPerOzUSD}`);
     return {
-      goldPerOzUSD,
-      silverPerOzUSD,
-      goldPerGramUSD: goldPerOzUSD / 31.1035,
-      silverPerGramUSD: silverPerOzUSD / 31.1035,
+      goldPerOzUSD: g,
+      silverPerOzUSD: s,
+      goldPerGramUSD: g / 31.1035,
+      silverPerGramUSD: s / 31.1035,
     };
   }
 }

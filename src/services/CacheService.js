@@ -35,9 +35,13 @@ class CacheService {
     }
   }
 
-  async getOrFetch(key, fetchFn, ttlMs = 3600000) {
+  async getOrFetch(key, fetchFn, ttlMs = 3600000, validateFn = null) {
     const cached = this.memoryCache.get(key);
-    if (cached && Date.now() - cached.timestamp < ttlMs) {
+    const cacheValid = cached &&
+      Date.now() - cached.timestamp < ttlMs &&
+      (validateFn === null || validateFn(cached.data));
+
+    if (cacheValid) {
       return { data: cached.data, fromCache: true };
     }
 
@@ -47,8 +51,8 @@ class CacheService {
       this._persistToFile();
       return { data, fromCache: false };
     } catch (err) {
-      // Fallback to stale cache
-      if (cached) {
+      // Fallback to stale cache only if it passes validation
+      if (cached && (validateFn === null || validateFn(cached.data))) {
         return { data: cached.data, fromCache: true, stale: true };
       }
       throw err;

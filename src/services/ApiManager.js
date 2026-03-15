@@ -11,7 +11,13 @@ class ApiManager {
 
   async fetchAllPrices() {
     const [metals, rates] = await Promise.all([
-      this.cache.getOrFetch('metals', () => this.metalProvider.fetchPrices(), 3600000),
+      this.cache.getOrFetch(
+        'metals',
+        () => this.metalProvider.fetchPrices(),
+        3600000,
+        (d) => d != null && isFinite(d.goldPerGramUSD) && d.goldPerGramUSD > 0
+               && isFinite(d.silverPerGramUSD) && d.silverPerGramUSD > 0
+      ),
       this.cache.getOrFetch('rates', () => this.currencyProvider.fetchRates(), 3600000),
     ]);
 
