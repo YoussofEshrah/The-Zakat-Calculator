@@ -1,9 +1,32 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const ApiManager = require('./services/ApiManager');
 
 let mainWindow;
 let apiManager;
+
+// Load .env file from project root
+function loadEnv() {
+  const envPath = path.join(__dirname, '..', '.env');
+  try {
+    const content = fs.readFileSync(envPath, 'utf8');
+    for (const line of content.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const eqIndex = trimmed.indexOf('=');
+      if (eqIndex > 0) {
+        const key = trimmed.slice(0, eqIndex).trim();
+        const val = trimmed.slice(eqIndex + 1).trim();
+        if (!process.env[key]) process.env[key] = val;
+      }
+    }
+  } catch {
+    // .env file is optional
+  }
+}
+
+loadEnv();
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -32,7 +55,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  apiManager = new ApiManager(app.getPath('userData'));
+  apiManager = new ApiManager(app.getPath('userData'), process.env.METAL_API_KEY);
   createWindow();
 
   // IPC: renderer requests live prices + exchange rates
