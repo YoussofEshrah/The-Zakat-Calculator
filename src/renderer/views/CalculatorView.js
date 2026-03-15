@@ -73,12 +73,13 @@ export class CalculatorView {
       this.prices = result;
 
       const ts = new Date().toLocaleTimeString();
+      const via = result.metalProvider ? ` · ${result.metalProvider}` : '';
       if (result.stale) {
-        this.statusBar.setStatus('stale', `Using cached prices — could not reach server (as of ${ts})`);
+        this.statusBar.setStatus('stale', `Using cached prices${via} — could not reach server (${ts})`);
       } else if (result.fromCache) {
-        this.statusBar.setStatus('live', `Prices from cache (${ts})`);
+        this.statusBar.setStatus('live', `Prices from cache${via} (${ts})`);
       } else {
-        this.statusBar.setStatus('live', `Live prices loaded (${ts})`);
+        this.statusBar.setStatus('live', `Live prices loaded${via} (${ts})`);
       }
 
       // Re-run calculation if we already had one displayed

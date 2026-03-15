@@ -3,9 +3,9 @@ const MetalPriceProvider = require('./MetalPriceProvider');
 const CurrencyProvider = require('./CurrencyProvider');
 
 class ApiManager {
-  constructor(cacheDir, metalApiKey) {
+  constructor(cacheDir, { metalApiKey, goldApiKey, provider } = {}) {
     this.cache = new CacheService(cacheDir);
-    this.metalProvider = new MetalPriceProvider(metalApiKey);
+    this.metalProvider = new MetalPriceProvider({ metalApiKey, goldApiKey, provider });
     this.currencyProvider = new CurrencyProvider();
   }
 
@@ -26,6 +26,7 @@ class ApiManager {
 
     return {
       metalPrices: metals.data,
+      metalProvider: metals.data.provider || null,
       exchangeRates: rates.data,
       fromCache: metals.fromCache && rates.fromCache,
       stale: metals.stale || rates.stale || false,

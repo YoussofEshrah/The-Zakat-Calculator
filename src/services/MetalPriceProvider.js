@@ -1,8 +1,19 @@
 const https = require('https');
 
 function httpGet(url) {
+  return httpGetWithHeaders(url, {});
+}
+
+function httpGetWithHeaders(url, headers) {
   return new Promise((resolve, reject) => {
-    const req = https.get(url, (res) => {
+    const parsedUrl = new URL(url);
+    const options = {
+      hostname: parsedUrl.hostname,
+      path: parsedUrl.pathname + parsedUrl.search,
+      method: 'GET',
+      headers,
+    };
+    const req = https.request(options, (res) => {
       let data = '';
       res.on('data', (chunk) => { data += chunk; });
       res.on('end', () => {
@@ -22,36 +33,49 @@ function httpGet(url) {
       req.destroy();
       reject(new Error('Request timeout'));
     });
+    req.end();
   });
 }
 
 class MetalPriceProvider {
-  constructor(apiKey) {
-    this.apiKey = apiKey || '';
+  constructor({ metalApiKey, goldApiKey, provider } = {}) {
+    this.metalApiKey = metalApiKey || '';
+    this.goldApiKey = goldApiKey || '';
+    // provider: 'goldapi' = goldapi.io first; anything else = auto waterfall
+    this.provider = provider || 'auto';
   }
 
   async fetchPrices() {
     const errors = [];
 
-    // Try metals.live first (free, no key)
+    // goldapi.io first when explicitly selected
+    if (this.provider === 'goldapi' && this.goldApiKey) {
+      try {
+        return { ...await this._fetchFromGoldAPIio(), provider: 'goldapi.io' };
+      } catch (e) {
+        errors.push(`goldapi.io: ${e.message}`);
+      }
+    }
+
+    // metals.live (free, no key)
     try {
-      return await this._fetchFromMetalsLive();
+      return { ...await this._fetchFromMetalsLive(), provider: 'metals.live' };
     } catch (e) {
       errors.push(`metals.live: ${e.message}`);
     }
 
-    // Try metalpriceapi.com (if API key provided)
-    if (this.apiKey) {
+    // metalpriceapi.com (if key provided)
+    if (this.metalApiKey) {
       try {
-        return await this._fetchFromMetalPriceAPI();
+        return { ...await this._fetchFromMetalPriceAPI(), provider: 'metalpriceapi.com' };
       } catch (e) {
         errors.push(`metalpriceapi: ${e.message}`);
       }
     }
 
-    // Try frankfurter.dev as last resort (ECB data, no silver)
+    // frankfurter.dev as last resort (ECB data, no silver)
     try {
-      return await this._fetchFromGoldAPI();
+      return { ...await this._fetchFromFrankfurter(), provider: 'frankfurter.dev' };
     } catch (e) {
       errors.push(`frankfurter: ${e.message}`);
     }
@@ -59,8 +83,24 @@ class MetalPriceProvider {
     throw new Error(`All metal price providers failed: ${errors.join('; ')}`);
   }
 
+  async _fetchFromGoldAPIio() {
+    const headers = {
+      'x-access-token': this.goldApiKey,
+      'Content-Type': 'application/json',
+    };
+    const [goldData, silverData] = await Promise.all([
+      httpGetWithHeaders('https://www.goldapi.io/api/XAU/USD', headers),
+      httpGetWithHeaders('https://www.goldapi.io/api/XAG/USD', headers),
+    ]);
+
+    const goldPerOzUSD = parseFloat(goldData.price);
+    const silverPerOzUSD = parseFloat(silverData.price);
+
+    return this._normalize(goldPerOzUSD, silverPerOzUSD);
+  }
+
   async _fetchFromMetalPriceAPI() {
-    const url = `https://api.metalpriceapi.com/v1/latest?api_key=${this.apiKey}&base=USD&currencies=XAU,XAG`;
+    const url = `https://api.metalpriceapi.com/v1/latest?api_key=${this.metalApiKey}&base=USD&currencies=XAU,XAG`;
     const data = await httpGet(url);
 
     if (!data.success) {
@@ -98,14 +138,13 @@ class MetalPriceProvider {
     return num;
   }
 
-  async _fetchFromGoldAPI() {
+  async _fetchFromFrankfurter() {
     // Uses frankfurter.dev to get XAU (gold oz) rate via ECB data
     // Returns: 1 XAU (troy oz) in USD
     const data = await httpGet('https://api.frankfurter.dev/v1/latest?from=XAU&to=USD');
     const goldPerOzUSD = data.rates.USD;
 
     // Frankfurter doesn't have silver; use a typical gold:silver ratio of ~80:1
-    // This is approximate and the cache will be labeled accordingly
     const silverPerOzUSD = goldPerOzUSD / 80;
 
     return this._normalize(goldPerOzUSD, silverPerOzUSD);

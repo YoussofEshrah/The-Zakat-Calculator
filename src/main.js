@@ -56,7 +56,11 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  apiManager = new ApiManager(app.getPath('userData'), process.env.METAL_API_KEY);
+  apiManager = new ApiManager(app.getPath('userData'), {
+    metalApiKey: process.env.METAL_API_KEY,
+    goldApiKey: process.env.GOLD_API_KEY,
+    provider: process.env.METAL_API_PROVIDER,
+  });
   createWindow();
 
   // IPC: renderer requests live prices + exchange rates
