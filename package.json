@@ -5,8 +5,8 @@
   "main": "src/main.js",
   "scripts": {
     "start": "node scripts/start.js",
-    "dist": "electron-builder --win",
-    "dist:portable": "electron-builder --win portable"
+    "dist": "electron-packager . \"Zakat Calculator\" --platform=win32 --arch=x64 --out=dist --overwrite --icon=assets/icons/icon.ico --ignore=dist --ignore=node_modules/@electron/packager --ignore=node_modules/electron-builder",
+    "dist:builder": "electron-builder --win"
   },
   "repository": {
     "type": "git",
@@ -15,6 +15,7 @@
   "author": "Youssof Eshrah",
   "license": "ISC",
   "devDependencies": {
+    "@electron/packager": "^19.1.0",
     "cross-env": "^10.1.0",
     "electron": "^32.2.7",
     "electron-builder": "^25.1.8"

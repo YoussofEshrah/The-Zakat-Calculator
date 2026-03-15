@@ -19,7 +19,9 @@ win:
       arch: [x64]
     - target: portable
       arch: [x64]
-  icon: assets/icons/icon.png
+  icon: assets/icons/icon.ico
+  # No code-signing cert — skip signing
+  forceCodeSigning: false
 
 nsis:
   oneClick: true

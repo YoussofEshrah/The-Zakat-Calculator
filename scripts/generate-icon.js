@@ -104,3 +104,24 @@ fs.mkdirSync(outDir, { recursive: true });
 const png = makePNG(256);
 fs.writeFileSync(path.join(outDir, 'icon.png'), png);
 console.log('Generated assets/icons/icon.png (256x256)');
+
+// Generate .ico by embedding the PNG (Vista+ ICO-with-PNG format)
+// ICO header: reserved(2) + type(2=1) + count(2=1) = 6 bytes
+// ICONDIRENTRY: w(1) h(1) colors(1) reserved(1) planes(2) bitCount(2) bytesInRes(4) offset(4) = 16 bytes
+// Total header size: 22 bytes, PNG data follows immediately
+const icoHeader = Buffer.alloc(22);
+icoHeader.writeUInt16LE(0, 0);       // reserved
+icoHeader.writeUInt16LE(1, 2);       // type: 1 = icon
+icoHeader.writeUInt16LE(1, 4);       // count: 1 image
+icoHeader.writeUInt8(0, 6);          // width: 0 = 256
+icoHeader.writeUInt8(0, 7);          // height: 0 = 256
+icoHeader.writeUInt8(0, 8);          // color count: 0 = >256 colors
+icoHeader.writeUInt8(0, 9);          // reserved
+icoHeader.writeUInt16LE(1, 10);      // planes
+icoHeader.writeUInt16LE(32, 12);     // bit count
+icoHeader.writeUInt32LE(png.length, 14); // bytes in resource
+icoHeader.writeUInt32LE(22, 18);     // offset of image data
+
+const ico = Buffer.concat([icoHeader, png]);
+fs.writeFileSync(path.join(outDir, 'icon.ico'), ico);
+console.log('Generated assets/icons/icon.ico (256x256 PNG-in-ICO)');
