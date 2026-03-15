@@ -440,3 +440,103 @@
 .no-entries__text {
   font-size: var(--font-size-md);
 }
+
+/* ============================
+   Results — additions
+   ============================ */
+
+/* "No Zakat" total banner variant */
+.results__total--none {
+  background: var(--color-text-secondary);
+}
+
+.results__total-none-msg {
+  font-size: var(--font-size-sm);
+  opacity: 0.9;
+  margin: var(--space-sm) 0 var(--space-xs);
+  line-height: 1.5;
+}
+
+/* Zakat row when category is below Nisab */
+.results__category-zakat--zero {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Categories wrapper */
+.results__categories {
+  /* just a logical grouping — no extra spacing needed */
+}
+
+.results__no-categories {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  padding: var(--space-lg);
+}
+
+/* Nisab progress bar */
+.results__progress {
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 2px;
+  margin: var(--space-sm) 0;
+  overflow: hidden;
+}
+
+.results__progress-bar {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 2px;
+  transition: width var(--transition-base);
+  min-width: 2px;
+}
+
+/* Empty panel message variants */
+.results__empty-text--error {
+  color: var(--color-danger);
+}
+
+.results__empty-text--info {
+  color: var(--color-text-secondary);
+}
+
+/* ============================
+   Status bar — additions
+   ============================ */
+.status-bar__dot--loading {
+  background: var(--color-primary);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.status-bar__retry {
+  margin-inline-start: var(--space-sm);
+  padding: 1px var(--space-sm);
+  font-family: var(--font-family);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.status-bar__retry:hover {
+  background: var(--color-surface-hover);
+}
+
+/* ============================
+   Header brand
+   ============================ */
+.app-header__brand {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+}

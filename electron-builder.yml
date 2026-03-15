@@ -1,0 +1,32 @@
+appId: com.zakatcalculator.app
+productName: Zakat Calculator
+copyright: Copyright © 2025 Youssof Eshrah
+
+directories:
+  output: dist
+  buildResources: assets
+
+files:
+  - src/**/*
+  - assets/icons/*
+  - scripts/start.js
+  - package.json
+  - "!src/renderer/**/*.map"
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
+  icon: assets/icons/icon.png
+
+nsis:
+  oneClick: true
+  allowToChangeInstallationDirectory: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Zakat Calculator
+
+portable:
+  artifactName: ZakatCalculator-Portable-${version}.exe

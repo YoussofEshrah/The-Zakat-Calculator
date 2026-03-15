@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const ApiManager = require('./services/ApiManager');
+const ZakatEngine = require('./core/ZakatEngine');
 
 let mainWindow;
 let apiManager;
@@ -61,6 +62,11 @@ app.whenReady().then(() => {
   // IPC: renderer requests live prices + exchange rates
   ipcMain.handle('fetch-prices', async () => {
     return apiManager.fetchAllPrices();
+  });
+
+  // IPC: renderer sends assets + prices, gets back Zakat result
+  ipcMain.handle('calculate-zakat', async (_event, { assets, metalPrices, exchangeRates, outputCurrency }) => {
+    return ZakatEngine.calculate({ assets, metalPrices, exchangeRates, outputCurrency });
   });
 
   app.on('activate', () => {

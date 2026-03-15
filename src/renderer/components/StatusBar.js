@@ -2,22 +2,26 @@ export class StatusBar {
   constructor(container) {
     this.el = document.createElement('div');
     this.el.className = 'status-bar';
-    this.el.innerHTML = `
-      <span class="status-bar__dot"></span>
-      <span class="status-bar__text">Ready</span>
-    `;
+    this._render('', 'Ready');
     container.appendChild(this.el);
   }
 
-  setStatus(status, message) {
-    const dot = this.el.querySelector('.status-bar__dot');
-    const text = this.el.querySelector('.status-bar__text');
+  setStatus(status, message, onRetry = null) {
+    this._render(status, message, onRetry);
+  }
 
-    dot.className = 'status-bar__dot';
-    if (status === 'live') dot.classList.add('status-bar__dot--live');
-    else if (status === 'stale') dot.classList.add('status-bar__dot--stale');
-    else if (status === 'error') dot.classList.add('status-bar__dot--error');
+  _render(status, message, onRetry) {
+    const dotClass = status ? `status-bar__dot--${status}` : '';
+    const retryHtml = onRetry ? `<button class="status-bar__retry">Retry</button>` : '';
 
-    text.textContent = message;
+    this.el.innerHTML = `
+      <span class="status-bar__dot ${dotClass}"></span>
+      <span class="status-bar__text">${message}</span>
+      ${retryHtml}
+    `;
+
+    if (onRetry) {
+      this.el.querySelector('.status-bar__retry').addEventListener('click', onRetry);
+    }
   }
 }
