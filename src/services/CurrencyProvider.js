@@ -1,33 +1,27 @@
-const { net } = require('electron');
+const https = require('https');
 
 function httpGet(url) {
   return new Promise((resolve, reject) => {
-    const request = net.request(url);
-    let data = '';
-
-    request.on('response', (response) => {
-      response.on('data', (chunk) => { data += chunk.toString(); });
-      response.on('end', () => {
-        if (response.statusCode >= 200 && response.statusCode < 300) {
+    const req = https.get(url, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
           try {
             resolve(JSON.parse(data));
           } catch (e) {
             reject(new Error('Invalid JSON response'));
           }
         } else {
-          reject(new Error(`HTTP ${response.statusCode}: ${data.slice(0, 200)}`));
+          reject(new Error(`HTTP ${res.statusCode}: ${data.slice(0, 200)}`));
         }
       });
     });
-
-    request.on('error', reject);
-
-    setTimeout(() => {
-      request.abort();
+    req.on('error', reject);
+    req.setTimeout(15000, () => {
+      req.destroy();
       reject(new Error('Request timeout'));
-    }, 15000);
-
-    request.end();
+    });
   });
 }
 
