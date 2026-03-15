@@ -8,6 +8,9 @@ export class CalculatorView {
     this.appEl = appEl;
     this.prices = null;
     this.lastResult = null;
+    // Restore saved theme before building so there's no flash
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
     this._build();
     this._fetchPrices();
   }
@@ -25,8 +28,23 @@ export class CalculatorView {
     `;
     this.appEl.appendChild(header);
 
-    this.currencyPicker = new CurrencyPicker(header.querySelector('#header-right'), 'USD');
+    const headerRight = header.querySelector('#header-right');
+
+    this.currencyPicker = new CurrencyPicker(headerRight, 'USD');
     this.currencyPicker.onChange(() => this._recalculate());
+
+    // Dark mode toggle
+    const themeBtn = document.createElement('button');
+    themeBtn.className = 'theme-toggle';
+    themeBtn.setAttribute('aria-label', 'Toggle dark mode');
+    themeBtn.title = 'Toggle dark mode';
+    themeBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const next = isDark ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+    headerRight.appendChild(themeBtn);
 
     // Main
     const main = document.createElement('main');
