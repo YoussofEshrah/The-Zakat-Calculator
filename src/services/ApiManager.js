@@ -15,8 +15,11 @@ class ApiManager {
         'metals',
         () => this.metalProvider.fetchPrices(),
         3600000,
-        (d) => d != null && isFinite(d.goldPerGramUSD) && d.goldPerGramUSD > 0
-               && isFinite(d.silverPerGramUSD) && d.silverPerGramUSD > 0
+        // Require realistic prices: gold > $10/gram, silver > $0.10/gram
+        // Prevents inverted/corrupted cached values from being served
+        (d) => d != null
+          && isFinite(d.goldPerGramUSD) && d.goldPerGramUSD > 10
+          && isFinite(d.silverPerGramUSD) && d.silverPerGramUSD > 0.1
       ),
       this.cache.getOrFetch('rates', () => this.currencyProvider.fetchRates(), 3600000),
     ]);

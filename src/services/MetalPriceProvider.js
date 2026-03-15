@@ -49,11 +49,11 @@ class MetalPriceProvider {
       }
     }
 
-    // Try goldapi.io free public data
+    // Try frankfurter.dev as last resort (ECB data, no silver)
     try {
       return await this._fetchFromGoldAPI();
     } catch (e) {
-      errors.push(`goldapi: ${e.message}`);
+      errors.push(`frankfurter: ${e.message}`);
     }
 
     throw new Error(`All metal price providers failed: ${errors.join('; ')}`);
@@ -67,8 +67,10 @@ class MetalPriceProvider {
       throw new Error('MetalPriceAPI request failed');
     }
 
-    const goldPerOzUSD = 1 / data.rates.USDXAU;
-    const silverPerOzUSD = 1 / data.rates.USDXAG;
+    // metalpriceapi returns USDXAU = USD per troy oz (the spot price directly)
+    // Do NOT invert — USDXAU is already the gold price in USD
+    const goldPerOzUSD = data.rates.USDXAU;
+    const silverPerOzUSD = data.rates.USDXAG;
 
     return this._normalize(goldPerOzUSD, silverPerOzUSD);
   }
@@ -98,6 +100,7 @@ class MetalPriceProvider {
 
   async _fetchFromGoldAPI() {
     // Uses frankfurter.dev to get XAU (gold oz) rate via ECB data
+    // Returns: 1 XAU (troy oz) in USD
     const data = await httpGet('https://api.frankfurter.dev/v1/latest?from=XAU&to=USD');
     const goldPerOzUSD = data.rates.USD;
 
